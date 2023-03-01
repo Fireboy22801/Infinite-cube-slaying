@@ -115,7 +115,7 @@ MonoBehaviour:
   halfHeight: 25
   rotationSpeed: 5
   moveSpeed: 10
-  dashSpeed: 20
+  dashSpeed: 30
 --- !u!114 &513402537437570113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,4 +128,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed63f342990dbdf4a947e1909050ffad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 0}

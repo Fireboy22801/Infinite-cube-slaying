@@ -1,33 +1,41 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class BallLauncher : MonoBehaviour
 {
     [SerializeField] private GameObject ballPrefab;
+    [SerializeField] private GameObject ballUIObject;
     [SerializeField] private float launchHeight = 10f;
     [SerializeField] private float flightTime = 2f;
     [SerializeField] private Vector3 offSet;
+    [SerializeField] private TMP_Text ballCooldownText;
 
     public int currentBallCount = 5;
 
     private float shootCooldown = 0.5f;
-    private float ballReloadCooldown = 1f;
+    private float ballReloadCooldown = 0f;
     private Camera mainCamera;
+    private BallsUI ballsUI;
     private bool canShoot;
 
     private void Start()
     {
         mainCamera = Camera.main;
+        ballsUI = ballUIObject.GetComponent<BallsUI>();
     }
 
     private void Update()
     {
         shootCooldown -= Time.deltaTime;
         ballReloadCooldown -= Time.deltaTime;
+        ballReloadCooldown = Math.Clamp(ballReloadCooldown, 0f, 0.99f);
+        ballCooldownText.text = Math.Round(ballReloadCooldown, 2).ToString("F2");
 
         if (ballReloadCooldown <= 0f && currentBallCount <= 4f)
         {
+            ballsUI.ShowBallsInStock(currentBallCount);
             ballReloadCooldown = 1f;
             currentBallCount++;
         }
