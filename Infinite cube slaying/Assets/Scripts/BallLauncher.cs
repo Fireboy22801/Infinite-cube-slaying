@@ -6,7 +6,6 @@ using UnityEngine;
 public class BallLauncher : MonoBehaviour
 {
     [SerializeField] private GameObject ballPrefab;
-    [SerializeField] private GameObject ballUIObject;
     [SerializeField] private float launchHeight = 10f;
     [SerializeField] private float flightTime = 2f;
     [SerializeField] private Vector3 offSet;
@@ -17,17 +16,18 @@ public class BallLauncher : MonoBehaviour
     private float shootCooldown = 0.5f;
     private float ballReloadCooldown = 0f;
     private Camera mainCamera;
-    private BallsUI ballsUI;
+    private BallsInventory inventory;
     private bool canShoot;
 
     private void Start()
     {
         mainCamera = Camera.main;
-        ballsUI = ballUIObject.GetComponent<BallsUI>();
+        inventory = GetComponent<BallsInventory>();
     }
 
     private void Update()
     {
+        inventory.UpdateBallsCount(currentBallCount);
         shootCooldown -= Time.deltaTime;
         ballReloadCooldown -= Time.deltaTime;
         ballReloadCooldown = Math.Clamp(ballReloadCooldown, 0f, 0.99f);
@@ -35,7 +35,6 @@ public class BallLauncher : MonoBehaviour
 
         if (ballReloadCooldown <= 0f && currentBallCount <= 4f)
         {
-            ballsUI.ShowBallsInStock(currentBallCount);
             ballReloadCooldown = 1f;
             currentBallCount++;
         }
