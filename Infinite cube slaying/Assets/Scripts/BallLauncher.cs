@@ -1,6 +1,6 @@
-using System;
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BallLauncher : MonoBehaviour
@@ -17,7 +17,6 @@ public class BallLauncher : MonoBehaviour
     private float ballReloadCooldown = 0f;
     private Camera mainCamera;
     private BallsInventory inventory;
-    private bool canShoot;
 
     private void Start()
     {
@@ -28,35 +27,34 @@ public class BallLauncher : MonoBehaviour
     private void Update()
     {
         inventory.UpdateBallsCount(currentBallCount);
-        shootCooldown -= Time.deltaTime;
-        ballReloadCooldown -= Time.deltaTime;
-        ballReloadCooldown = Math.Clamp(ballReloadCooldown, 0f, 0.99f);
-        ballCooldownText.text = Math.Round(ballReloadCooldown, 2).ToString("F2");
 
         if (ballReloadCooldown <= 0f && currentBallCount <= 4f)
         {
             ballReloadCooldown = 1f;
             currentBallCount++;
         }
-
-        if (shootCooldown <= 0 && currentBallCount > 0)
+        else
         {
-            shootCooldown = 0.5f;
-            canShoot = true;
+            ballReloadCooldown -= Time.deltaTime;
+            ballReloadCooldown = Mathf.Clamp01(ballReloadCooldown);
+            ballCooldownText.text = ballReloadCooldown.ToString("F2");
         }
 
-        if (canShoot)
+        if (shootCooldown > 0 || currentBallCount <= 0)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                Vector3 launchPosition = mainCamera.transform.position + mainCamera.transform.forward + offSet;
-                GameObject ball = Instantiate(ballPrefab, launchPosition, Quaternion.identity);
+            shootCooldown -= Time.deltaTime;
+            return;
+        }
 
-                StartCoroutine(MoveBall(ball));
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            Vector3 launchPosition = mainCamera.transform.position + mainCamera.transform.forward + offSet;
+            GameObject ball = Instantiate(ballPrefab, launchPosition, Quaternion.identity);
 
-                currentBallCount--;
-                canShoot = false;
-            }
+            StartCoroutine(MoveBall(ball));
+
+            currentBallCount--;
+            shootCooldown = 0.5f;
         }
     }
 
@@ -68,24 +66,28 @@ public class BallLauncher : MonoBehaviour
         float timeElapsed = 0f;
         while (timeElapsed < flightTime && ball != null)
         {
-            float t = Mathf.Clamp01(timeElapsed / flightTime);
+            float t = timeElapsed / flightTime;
             float height = launchHeight * Mathf.Sin(Mathf.PI * t);
             ball.transform.position = Vector3.Lerp(startPos, endPos, t) + Vector3.up * height;
             timeElapsed += Time.deltaTime;
             yield return null;
         }
+        Destroy(ball);
     }
 
     private Vector3 GetTargetPosition()
     {
         Vector3 targetPosition = Vector3.zero;
 
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
+        if (Input.touchCount > 0)
         {
-            targetPosition = hit.point;
+            Ray ray = mainCamera.ScreenPointToRay(Input.GetTouch(0).position);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                targetPosition = hit.point;
+            }
         }
 
         return targetPosition;

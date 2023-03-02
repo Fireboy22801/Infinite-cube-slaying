@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        Application.targetFrameRate = 60;
         cubesDeadText.text = CubesDead.ToString();
         spawner = GetComponent<Spawner>();
         SpawnCubes(startCubesCount);
